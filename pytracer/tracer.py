@@ -124,9 +124,19 @@ tracer.info(f"✅ Logger configured. Log level: {log_level_name}")
 
 # Use example
 
+import logging
+# from pytracer.tracer import tracer  # Importamos el logger configurado
+
+# Optional configuration: Change the logging level dynamically
+tracer.setLevel(logging.DEBUG)
+
+# Uso del logger
+def main():
+    tracer.debug("🔍 Debug message: Useful for diagnosing issues during development.")
+    tracer.info("ℹ️ Info message: General application progress updates.")
+    tracer.warning("⚠️ Warning message: Something unexpected but not an error.")
+    tracer.error("❌ Error message: A serious issue that needs attention.")
+    tracer.critical("🔥 Critical message: A severe failure, the program may crash.")
+
 if __name__ == "__main__":
-    tracer.debug("This message will not be displayed")
-    tracer.info("This message will be displayed")
-    tracer.warning("This message will be displayed")
-    tracer.error("This message will be displayed")
-    tracer.critical("This message will be displayed")
+    main()

@@ -23,6 +23,28 @@ pip install -r requirements.txt
 
 ### Basic Usage
 
+To use PyTracer, import the `tracer` logger and log messages at different levels:
+
+```python	
+import logging
+from pytracer.tracer import tracer  # Import the configured logger
+
+# Optional: Change logging level dynamically
+tracer.setLevel(logging.DEBUG)
+
+def main():
+    tracer.debug("🔍 Debug message: Useful for diagnosing issues during development.")
+    tracer.info("ℹ️ Info message: General application progress updates.")
+    tracer.warning("⚠️ Warning message: Something unexpected but not an error.")
+    tracer.error("❌ Error message: A serious issue that needs attention.")
+    tracer.critical("🔥 Critical message: A severe failure, the program may crash.")
+
+if __name__ == "__main__":
+    main()
+```
+
+Alternatively, you can use the `setup_logger` function to create a logger with the default configuration:
+
 ```python
 from pytracer.tracer import setup_logger
 
@@ -36,6 +58,38 @@ logger.warning("This is a warning message")
 logger.error("This is an error message")
 logger.critical("This is a critical message")
 ```
+
+👉 Use `setup_logger()` (**Second Approach**) when:
+
++ You need more control over logging configuration.
++ You are working on a larger project where logging settings may change dynamically.
++ You want better testability (e.g., create fresh loggers in unit tests).
+
+👉 Use `tracer` (**First Approach**) when:
+
++ You want a simpler and consistent logging setup.
++ The default logging configuration in `tracer.py` is good enough for your use case.
++ You are writing a small script where reconfiguring the logger isn't necessary.
+
+Instead of choosing one, you can use **both strategically**:
+
+```python
+from pytracer.tracer import setup_logger
+
+# Create a logger instance
+logger = setup_logger()
+
+# If needed, dynamically change settings
+logger.setLevel(logging.DEBUG)
+
+logger.info("Application started!")
+logger.warning("This is a warning message.")
+logger.error("Something went wrong!")
+
+# Now, if another module imports `tracer`, it will use the same configuration.
+```
+
+This approach **keeps the flexibility of `setup_logger()` while maintaining a global logger instance**.
 
 ### Configuring Log Level
 
