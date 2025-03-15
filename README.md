@@ -11,12 +11,17 @@ PyTracer is a Python library for setting up and managing a logger with advanced 
 
 ## Installation
 
-To install PyTracer, clone the repository and install the dependencies:
+To install PyTracer directly from GitHub, use the following command:
 
 ```bash
-git clone https://github.com/miguel-conde/pytracer.git
-cd pytracer
-pip install -r requirements.txt
+pip install git+https://github.com/miguel-conde/pytracer.git
+```
+
+or, if you want to install it from the `develop` branch:
+
+```bash
+pip install git+https://github.com/miguel-conde/pytracer.git@develop
+```
 ```
 
 ## Usage
