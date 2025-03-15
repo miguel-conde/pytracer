@@ -11,15 +11,19 @@ import logging
 import os
 from dotenv import load_dotenv, find_dotenv
 
-# Cargar variables de entorno desde .env si está disponible
+
+# Load environment variables from .env if available
 dotenv_path = find_dotenv()
 if dotenv_path:
     load_dotenv(dotenv_path)
 
 def get_log_level() -> int:
     """
-    Obtiene el nivel de log desde la variable de entorno LOG_LVL.
-    Si es inválido, devuelve INFO por defecto.
+    Retrieves the log level from the environment variable LOG_LVL.
+    If it is invalid, returns INFO by default.
+    
+    Returns:
+        int: Log level constant from the logging module.
     """
     log_level_str = os.getenv("LOG_LVL", "INFO").upper()
     valid_levels = {
@@ -31,52 +35,98 @@ def get_log_level() -> int:
     }
     
     if log_level_str not in valid_levels:
-        print(f"⚠️ Nivel de log inválido '{log_level_str}', usando INFO por defecto.")
+        print(f"⚠️ Invalid log level '{log_level_str}', using INFO by default.")
         return logging.INFO
 
     return valid_levels[log_level_str]
 
+
 def setup_logger() -> logging.Logger:
     """
-    Configura un logger global con formato estándar y manejo de errores en el archivo de logs.
+    Configures the global logger with advanced formatting and options.
+
+    Returns:
+        logging.Logger: Configured logger instance.
+        
+    Usage example:
+    ```python	
+    # Global logger instance
+    tracer = setup_logger()
+    
+    # Use example
+    if __name__ == "__main__":
+        tracer.debug("This message will not be displayed")
+        tracer.info("This message will be displayed")
+        tracer.warning("This message will be displayed")
+        tracer.error("This message will be displayed")
+        tracer.critical("This message will be displayed")
+    ```
     """
     logger = logging.getLogger("app_tracer")
 
-    # Verificar si el logger ya está configurado
-    if logger.hasHandlers():
-        return logger
+    # Retrieve the log level from the environment variable
+    log_level = os.getenv("LOG_LVL", "INFO").upper()
+    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    if log_level not in valid_levels:
+        log_level = "INFO"
+    log_level = getattr(logging, log_level)
 
-    log_level = get_log_level()
-    logger.setLevel(log_level)
-
-    # Formato de logs
+    # Configure the log format
     formatter = logging.Formatter(
         fmt="%(asctime)s [%(levelname)s] [%(module)s:%(funcName)s] - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # Handler para consola
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(log_level)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-    # Handler para archivo (validando permisos)
-    log_file = os.getenv("LOG_FILE", "application.log")
+    # Configure the log level
+    logger.setLevel(log_level)
     
-    try:
-        file_handler = logging.FileHandler(log_file, mode="a")  # Append mode
-        file_handler.setLevel(log_level)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-    except (OSError, PermissionError) as e:
-        logger.warning(f"No se pudo escribir en el archivo de logs '{log_file}': {e}")
+    # Check if logging to file is enabled
+    log_to_file = os.getenv("LOG_TO_FILE", "false").lower() == "true"
+    log_dir = os.getenv("LOG_DIR", "./logs")
+    unique_log = os.getenv("LOG_UNIQUE_FILE", "false").lower() == "true"
+    
+    if log_to_file:
+        os.makedirs(log_dir, exist_ok=True)
+        if unique_log:
+            from datetime import datetime
+            log_filename = datetime.now().strftime("%Y%m%d%H%M%S.log")
+        else:
+            log_filename = "application.log"
+        log_file_path = os.path.join(log_dir, log_filename)
+
+        has_file_handler = any(
+            isinstance(h, logging.FileHandler) and h.baseFilename == log_file_path
+            for h in logger.handlers
+        )
+        
+        if not has_file_handler:
+            file_handler = logging.FileHandler(log_file_path)
+            file_handler.setLevel(log_level)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+    
+    # Configure the console handler only if not already added
+    if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(log_level)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
 
     return logger
 
-# Instancia global del logger
+# Global logger instance
 tracer = setup_logger()
 
-# Registrar nivel de log actual
+# Log current log level
 log_level_name = logging.getLevelName(tracer.getEffectiveLevel())
-tracer.info(f"✅ Logger configurado. Nivel de log: {log_level_name}")
+tracer.info(f"✅ Logger configured. Log level: {log_level_name}")
+
+
+# Use example
+
+if __name__ == "__main__":
+    tracer.debug("This message will not be displayed")
+    tracer.info("This message will be displayed")
+    tracer.warning("This message will be displayed")
+    tracer.error("This message will be displayed")
+    tracer.critical("This message will be displayed")
