@@ -44,6 +44,13 @@ def get_log_level() -> int:
 def setup_logger() -> logging.Logger:
     """
     Configures the global logger with advanced formatting and options.
+    
+    Environment variables:
+    + LOG_LVL: Sets the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default is INFO.
+    + LOG_TO_FILE: If set to "true", logs will be written to a file. Default is "false".
+    + LOG_DIR: Directory where log files will be stored. Default is "./logs".
+    + LOG_UNIQUE_FILE: If set to "true", each log file will have a unique name based on the current timestamp. Default is "false".
+    + LOG_NAME: Name of the log file. Default is "application.log".
 
     Returns:
         logging.Logger: Configured logger instance.
@@ -84,14 +91,15 @@ def setup_logger() -> logging.Logger:
     log_to_file = os.getenv("LOG_TO_FILE", "false").lower() == "true"
     log_dir = os.getenv("LOG_DIR", "./logs")
     unique_log = os.getenv("LOG_UNIQUE_FILE", "false").lower() == "true"
+    log_name = os.getenv("LOG_NAME", "application.log")
     
     if log_to_file:
         os.makedirs(log_dir, exist_ok=True)
         if unique_log:
             from datetime import datetime
-            log_filename = datetime.now().strftime("%Y%m%d%H%M%S.log")
+            log_filename = datetime.now().strftime("%Y%m%d%H%M%S_") + log_name
         else:
-            log_filename = "application.log"
+            log_filename = log_name
         log_file_path = os.path.join(log_dir, log_filename)
 
         has_file_handler = any(

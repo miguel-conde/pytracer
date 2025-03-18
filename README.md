@@ -22,7 +22,6 @@ or, if you want to install it from the `develop` branch:
 ```bash
 pip install git+https://github.com/miguel-conde/pytracer.git@develop
 ```
-```
 
 ## Usage
 
@@ -119,6 +118,14 @@ To create unique log files for each run, set the `LOG_UNIQUE_FILE` environment v
 
 ```bash
 export LOG_UNIQUE_FILE=true
+```
+
+### Custom Log File Name
+
+To specify a custom name for the log file, set the `LOG_NAME` environment variable:
+
+```bash
+export LOG_NAME=my_custom_log.log
 ```
 
 ## Testing
